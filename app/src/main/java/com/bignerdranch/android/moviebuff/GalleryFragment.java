@@ -7,11 +7,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import com.bignerdranch.android.moviebuff.Model.Movie;
 import com.bignerdranch.android.moviebuff.Network.MovieFetcher;
-import com.bignerdranch.android.moviebuff.Network.MovieFetcherListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +22,10 @@ import java.util.List;
 public class GalleryFragment extends Fragment {
 
     // Private Members
-
+    private MovieFetcher fetcher;
     private RecyclerView movieRecyclerView;
     private List<Movie> movies;
+    private int page = 1;
 
     // Constructor(s)
 
@@ -41,9 +42,10 @@ public class GalleryFragment extends Fragment {
 
         movies = new ArrayList<>();
 
-        refreshQuery();
-
         updateUi(view);
+
+        String path = "popular";
+        fetchData(path, page, true);
 
         return view;
     }
@@ -52,22 +54,40 @@ public class GalleryFragment extends Fragment {
 
     /**
      * Queries the API for movies
+     *
+     * @param path the path to append to the query (excluding API key)
      */
-    private void refreshQuery() {
-        new MovieFetcher(movies, new MovieFetcherListener() {
+    private void fetchData(String path, int page, final boolean append) {
+        if (fetcher == null) fetcher = new MovieFetcher(new MovieFetcher.MovieFetcherListener() {
 
             // Overridden Methods
             @Override
-            public void onMovieLoad() {
-                movieRecyclerView.setAdapter(new MovieAdapter(movies));
+            public void onMovieLoad(List<Movie> movies) {
+                if (! append) GalleryFragment.this.movies.clear();
+                GalleryFragment.this.movies.addAll(movies);
+                movieRecyclerView.getAdapter().notifyDataSetChanged();
             }
-        }).fetch("popular");
+        });
+        fetcher.fetch(path, page);
     }
 
     private void updateUi(View view) {
         if (movieRecyclerView == null) {
             movieRecyclerView = (RecyclerView) view.findViewById(R.id.fragment_gallery_recycler_view);
             movieRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+            movieRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+                // Overridden Methods
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    if (dy <= 0) return;
+                    if (! recyclerView.canScrollVertically(RecyclerView.VERTICAL)) {
+                        String path = "popular";
+                        fetchData(path, ++ page, true);
+                    }
+                }
+
+            });
         }
         if (movieRecyclerView.getAdapter() == null)
             movieRecyclerView.setAdapter(new MovieAdapter(movies));
@@ -94,7 +114,7 @@ public class GalleryFragment extends Fragment {
         // Overridden Methods
         @Override
         public MovieHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(getActivity()).inflate(android.R.layout.simple_list_item_1, parent, false);//TODO: Update this to needed layout
+            View itemView = LayoutInflater.from(getActivity()).inflate(R.layout.item_movie_thumbnail_view, parent, false);
             return new MovieHolder(itemView);
         }
 
@@ -107,24 +127,39 @@ public class GalleryFragment extends Fragment {
         public int getItemCount() {
             return movies.size();
         }
+
+        // Getter Methods
+        private List<Movie> getMovies() {
+            return movies;
+        }
+
+        // Setter Methods
+        private void setMovies(List<Movie> movies) {
+            this.movies = movies;
+        }
     }
 
     private class MovieHolder extends RecyclerView.ViewHolder {
 
         // Private Members
+
+        private final String LOG_TAG = MovieHolder.class.getSimpleName();
         private Movie movieHeld;
-        private TextView testTextView;//TODO: Delete this placeholder
+        private ImageView movieThumbnailImageView;
+
+        // Constants
 
         MovieHolder(View itemView) {
             super(itemView);
-            testTextView = (TextView) itemView;
+            movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_thumbnail_image_view);
         }
 
         // Private Methods
+
         private void bindMovie(Movie movie) {
             movieHeld = movie;
-            testTextView.setText(movie.getOriginalTitle());//TODO: Delete this placeholder
-            //TODO: Bind movie details to views
+            String posterPath = MovieFetcher.THUMBNAIL_BASE_URI + "/" + movie.getPosterPath();
+            Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
         }
 
     }

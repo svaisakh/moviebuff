@@ -33,15 +33,6 @@ class HttpHelper {
     // Constructor(s)
 
     /**
-     * Initializes the helper with the url string to fetch data from.
-     *
-     * @param urlString The URL string where the data needs to be received from
-     */
-    private HttpHelper(String urlString) throws IOException {
-        this(new URL(urlString));
-    }
-
-    /**
      * Initializes the helper with the url to fetch data from.
      *
      * @param url The URL where the data needs to be received from
@@ -50,6 +41,15 @@ class HttpHelper {
         urlConnection = (HttpURLConnection) url.openConnection();
         connect();
         fetchData();
+    }
+
+    /**
+     * Initializes the helper with the url string to fetch data from.
+     *
+     * @param urlString The URL string where the data needs to be received from
+     */
+    private HttpHelper(String urlString) throws IOException {
+        this(new URL(urlString));
     }
 
     /**

@@ -28,7 +28,7 @@ public class Movie {
     }
 
     // Getter Methods
-    private long getId() {
+    public long getId() {
         return id;
     }
 
@@ -44,7 +44,7 @@ public class Movie {
         return popularity;
     }
 
-    private String getPosterPath() {
+    public String getPosterPath() {
         return posterPath;
     }
 

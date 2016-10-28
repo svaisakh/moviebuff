@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,10 +23,8 @@ public class MovieFetcher {
     // Private Members
 
     private MovieFetcherListener fetcherListener;
-    private List<Movie> movieList;
 
     // Constants
-
     /**
      * My v3 API Key for themoviedb.org
      */
@@ -34,14 +33,14 @@ public class MovieFetcher {
      * The base uri for the data. Note the /3/ added for v3 API Key
      */
     private static final String BASE_URI = "https://api.themoviedb.org/3/movie";
+    public static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p/w500";
 
     // Constructor(s)
 
     /**
      * Assigns the list of movies to be fetched into
      */
-    public MovieFetcher(List<Movie> movieList, MovieFetcherListener fetcherListener) {
-        this.movieList = movieList;
+    public MovieFetcher(MovieFetcherListener fetcherListener) {
         this.fetcherListener = fetcherListener;
     }
 
@@ -52,8 +51,8 @@ public class MovieFetcher {
      *
      * @param jsonArray Array of JSONObjects representing a Movie
      */
-    private void inflate(JSONArray jsonArray) throws JSONException {
-        movieList.clear();
+    private static List<Movie> inflate(JSONArray jsonArray) throws JSONException {
+        List<Movie> movieList = new ArrayList<>();
         JSONObject movieJSONObject;
         Movie movie;
         for (int i = 0; i < jsonArray.length(); i++) {
@@ -61,6 +60,7 @@ public class MovieFetcher {
             movie = new Movie(movieJSONObject);
             movieList.add(movie);
         }
+        return movieList;
     }
 
     /**
@@ -80,12 +80,13 @@ public class MovieFetcher {
     // Public Methods
 
     /**
-     * Fetches a list of movies from themoviedb.org customized according to the parameters
+     * Fetches a list of movies from themoviedb.org customized according to the appended URL
      *
-     * @param category the category of movies (eg. popular/top_rated etc.)
+     * @param appendString the URL that gets appended to the base URL (excluding API key
+     * @param page the page that needs to be queried from
      */
-    public void fetch(String category) {
-        new FetchMovieTask().execute(category);
+    public void fetch(String appendString, int page) {
+        new FetchMovieTask().execute(appendString, String.valueOf(page));
     }
 
     // Inner Classes
@@ -107,20 +108,22 @@ public class MovieFetcher {
          */
         @Override
         protected void onPostExecute(String movieData) {
+            List<Movie> movies = null;
             try {
-                inflate(parse(movieData));
+                movies = inflate(parse(movieData));
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Trouble brewing!", e);
                 e.printStackTrace();
             }
-            fetcherListener.onMovieLoad();
+            fetcherListener.onMovieLoad(movies);
         }
 
         /**
          * Fetches movie JSON string from themoviedb.org
          *
-         * @param params The movie path that is needed (eg. popular/top_rated etc.)
-         *               Only the first string will be used.
+         * @param params The rest of the path of the query.
+         *               Index 0 should be the movie path that is needed (eg. popular/top_rated etc.)
+         *               Index 1 is the page number
          * @return Returns the string obtained from the query
          */
         @Override
@@ -131,6 +134,7 @@ public class MovieFetcher {
             Uri movieUri = Uri.parse(BASE_URI)
                               .buildUpon()
                               .appendPath(params[0])
+                              .appendQueryParameter("page", params[1])
                               .appendQueryParameter("api_key", API_KEY)
                               .build();
 
@@ -149,6 +153,21 @@ public class MovieFetcher {
 
             return movieData;
         }
+
+    }
+
+    /**
+     * Listener for events regarding MovieFetcher
+     * Created by Vaisakh on 28-10-2016.
+     */
+    public interface MovieFetcherListener {
+
+        // Public Methods
+
+        /**
+         * Callback triggered after movie list is loaded
+         */
+        void onMovieLoad(List<Movie> movies);
 
     }
 
