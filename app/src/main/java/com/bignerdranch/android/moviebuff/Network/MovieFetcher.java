@@ -33,7 +33,7 @@ public class MovieFetcher {
      * The base uri for the data. Note the /3/ added for v3 API Key
      */
     private static final String BASE_URI = "https://api.themoviedb.org/3/movie";
-    public static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p/w500";
+    public static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p/w342";
 
     // Constructor(s)
 
@@ -83,7 +83,7 @@ public class MovieFetcher {
      * Fetches a list of movies from themoviedb.org customized according to the appended URL
      *
      * @param appendString the URL that gets appended to the base URL (excluding API key
-     * @param page the page that needs to be queried from
+     * @param page         the page that needs to be queried from
      */
     public void fetch(String appendString, int page) {
         new FetchMovieTask().execute(appendString, String.valueOf(page));

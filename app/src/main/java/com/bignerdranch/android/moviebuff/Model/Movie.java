@@ -36,11 +36,11 @@ public class Movie {
         return originalTitle;
     }
 
-    private String getOverview() {
+    public String getOverview() {
         return overview;
     }
 
-    private double getPopularity() {
+    public double getPopularity() {
         return popularity;
     }
 
@@ -52,7 +52,7 @@ public class Movie {
         return releaseDate;
     }
 
-    private double getVoteAverage() {
+    public double getVoteAverage() {
         return voteAverage;
     }
 
@@ -107,6 +107,7 @@ public class Movie {
         double popularity = movieJSONObject.getDouble(OWM_POPULARITY);
         String posterPath = movieJSONObject.getString(OWM_POSTER_PATH);
         String releaseDate = movieJSONObject.getString(OWM_RELEASE_DATE);
+        double voteAverage = movieJSONObject.getDouble(OWM_VOTE_AVERAGE);
 
         setId(id);
         setOriginalTitle(originalTitle);
