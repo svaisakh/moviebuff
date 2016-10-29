@@ -3,12 +3,14 @@ package com.bignerdranch.android.moviebuff.Model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 /**
  * Created by Vaisakh on 27-10-2016.
  * Holds all information about the movie gathered from the database
  */
 
-public class Movie {
+public class Movie implements Serializable {
 
     // Private Members
     private long id;
@@ -48,7 +50,7 @@ public class Movie {
         return posterPath;
     }
 
-    private String getReleaseDate() {
+    public String getReleaseDate() {
         return releaseDate;
     }
 

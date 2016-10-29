@@ -96,6 +96,7 @@ public class GalleryFragment extends Fragment {
                 }
             });
             movieRecyclerView.setLayoutManager(layoutManager);
+
         }
     }
 
@@ -113,6 +114,7 @@ public class GalleryFragment extends Fragment {
     private class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.BindableMovieHolder> {
 
         // Private Members
+
         private final int VIEW_HOLDER_TYPE_LARGE = 1;
         /**
          * These values indicate which ViewHolder type to use
@@ -121,6 +123,7 @@ public class GalleryFragment extends Fragment {
         private List<Movie> movies;
 
         // Constructor(s)
+
         MovieAdapter(List<Movie> movies) {
             this.movies = movies;
         }
@@ -159,38 +162,40 @@ public class GalleryFragment extends Fragment {
         }
 
         // Getter Methods
+
         private List<Movie> getMovies() {
             return movies;
         }
 
         // Setter Methods
+
         private void setMovies(List<Movie> movies) {
             this.movies = movies;
         }
 
         // Inner Classes
 
-        abstract class BindableMovieHolder extends RecyclerView.ViewHolder implements Binder<Movie> {
+        abstract class BindableMovieHolder extends RecyclerView.ViewHolder implements Bindable<Movie>, View.OnClickListener {
 
             BindableMovieHolder(View itemView) {
                 super(itemView);
             }
         }
 
-        class LargeMovieHolder extends BindableMovieHolder implements Binder<Movie> {
+        class LargeMovieHolder extends BindableMovieHolder {
 
             // Private Members
-
             private final String LOG_TAG = LargeMovieHolder.class.getSimpleName();
+            private Movie movie;
             private TextView movieOverviewTextView;
             private ImageView movieThumbnailImageView;
             private TextView movieTitleTextView;
             private RatingBar moviewRatingBar;
 
             // Constants
-
             LargeMovieHolder(View itemView) {
                 super(itemView);
+                itemView.setOnClickListener(this);
                 movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_large_image_view);
                 movieTitleTextView = (TextView) itemView.findViewById(R.id.item_movie_large_title_text_view);
                 movieOverviewTextView = (TextView) itemView.findViewById(R.id.item_movie_large_overview_text_view);
@@ -199,7 +204,14 @@ public class GalleryFragment extends Fragment {
 
             // Overridden Methods
             @Override
+            public void onClick(View v) {
+                startActivity(DetailActivity.starterIntent(movie, getActivity()));
+            }
+
+            @Override
             public void bind(Movie movie) {
+                this.movie = movie;
+
                 if (movies.indexOf(movie) == movies.size() - 1) fetchData();
 
                 String posterPath = MovieFetcher.getPosterUrl("w342", movie.getPosterPath());
@@ -214,23 +226,29 @@ public class GalleryFragment extends Fragment {
             }
         }
 
-        class SmallMovieHolder extends BindableMovieHolder implements Binder<Movie> {
+        class SmallMovieHolder extends BindableMovieHolder {
 
             // Private Members
-
             private final String LOG_TAG = SmallMovieHolder.class.getSimpleName();
+            private Movie movie;
             private ImageView movieThumbnailImageView;
 
             // Constants
-
             SmallMovieHolder(View itemView) {
                 super(itemView);
+                itemView.setOnClickListener(this);
                 movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_small_image_view);
             }
 
             // Overridden Methods
             @Override
+            public void onClick(View v) {
+                startActivity(DetailActivity.starterIntent(movie, getActivity()));
+            }
+
+            @Override
             public void bind(Movie movie) {
+                this.movie = movie;
                 if (movies.indexOf(movie) == movies.size() - 1) fetchData();
 
                 String posterPath = MovieFetcher.getPosterUrl("w500", movie.getPosterPath());
@@ -238,15 +256,6 @@ public class GalleryFragment extends Fragment {
             }
         }
 
-    }
-
-    /**
-     * An interface which knows how to bind objects of type @param <T>
-     */
-    interface Binder<T> {
-
-        // Public Methods
-        void bind(T object);
     }
 
 }
