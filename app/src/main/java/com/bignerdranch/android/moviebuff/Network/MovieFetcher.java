@@ -33,7 +33,7 @@ public class MovieFetcher {
      * The base uri for the data. Note the /3/ added for v3 API Key
      */
     private static final String BASE_URI = "https://api.themoviedb.org/3/movie";
-    public static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p/w342";
+    private static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p";
 
     // Constructor(s)
 
@@ -87,6 +87,10 @@ public class MovieFetcher {
      */
     public void fetch(String appendString, int page) {
         new FetchMovieTask().execute(appendString, String.valueOf(page));
+    }
+
+    public static String getPosterUrl(String size, String moviePosterPath) {
+        return new StringBuilder(THUMBNAIL_BASE_URI).append("/").append(size).append("/").append(moviePosterPath).toString();
     }
 
     // Inner Classes

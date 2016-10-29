@@ -2,8 +2,9 @@ package com.bignerdranch.android.moviebuff;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -83,7 +84,18 @@ public class GalleryFragment extends Fragment {
                 movieRecyclerView.setAdapter(new MovieAdapter(movies));
             }
 
-            movieRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+            GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
+            layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+
+                // Overridden Methods
+                @Override
+                public int getSpanSize(int position) {
+                    if (position % 5 == 0) return 2;
+                    return 1;
+                }
+            });
+            movieRecyclerView.setLayoutManager(layoutManager);
         }
     }
 
@@ -95,9 +107,17 @@ public class GalleryFragment extends Fragment {
 
     // Inner Classes
 
-    private class MovieAdapter extends RecyclerView.Adapter<MovieHolder> {
+    /**
+     * Created by Vaisakh on 29-10-2016.
+     */
+    private class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.BindableMovieHolder> {
 
         // Private Members
+        private final int VIEW_HOLDER_TYPE_LARGE = 1;
+        /**
+         * These values indicate which ViewHolder type to use
+         */
+        private final int VIEW_HOLDER_TYPE_SMALL = 0;
         private List<Movie> movies;
 
         // Constructor(s)
@@ -107,14 +127,30 @@ public class GalleryFragment extends Fragment {
 
         // Overridden Methods
         @Override
-        public MovieHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(getActivity()).inflate(R.layout.item_movie_thumbnail_view, parent, false);
-            return new MovieHolder(itemView);
+        public int getItemViewType(int position) {
+            if (position % 5 == 0) return VIEW_HOLDER_TYPE_LARGE;
+            else return VIEW_HOLDER_TYPE_SMALL;
         }
 
         @Override
-        public void onBindViewHolder(MovieHolder holder, int position) {
-            holder.bindMovie(movies.get(position));
+        public BindableMovieHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView;
+            switch (viewType) {
+                case VIEW_HOLDER_TYPE_SMALL:
+                    itemView = LayoutInflater.from(getActivity()).inflate(R.layout.item_movie_small_view, parent, false);
+                    return new SmallMovieHolder(itemView);
+                case VIEW_HOLDER_TYPE_LARGE:
+                    itemView = LayoutInflater.from(getActivity()).inflate(R.layout.item_movie_large_view, parent, false);
+                    return new LargeMovieHolder(itemView);
+                default:
+                    Log.e(LOG_TAG, "View holder has wrong type onCreateViewHolder()");
+                    return null;
+            }
+        }
+
+        @Override
+        public void onBindViewHolder(BindableMovieHolder holder, int position) {
+            holder.bind(movies.get(position));
         }
 
         @Override
@@ -131,44 +167,86 @@ public class GalleryFragment extends Fragment {
         private void setMovies(List<Movie> movies) {
             this.movies = movies;
         }
+
+        // Inner Classes
+
+        abstract class BindableMovieHolder extends RecyclerView.ViewHolder implements Binder<Movie> {
+
+            BindableMovieHolder(View itemView) {
+                super(itemView);
+            }
+        }
+
+        class LargeMovieHolder extends BindableMovieHolder implements Binder<Movie> {
+
+            // Private Members
+
+            private final String LOG_TAG = LargeMovieHolder.class.getSimpleName();
+            private TextView movieOverviewTextView;
+            private ImageView movieThumbnailImageView;
+            private TextView movieTitleTextView;
+            private RatingBar moviewRatingBar;
+
+            // Constants
+
+            LargeMovieHolder(View itemView) {
+                super(itemView);
+                movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_large_image_view);
+                movieTitleTextView = (TextView) itemView.findViewById(R.id.item_movie_large_title_text_view);
+                movieOverviewTextView = (TextView) itemView.findViewById(R.id.item_movie_large_overview_text_view);
+                moviewRatingBar = (RatingBar) itemView.findViewById(R.id.item_movie_large_rating_bar_view);
+            }
+
+            // Overridden Methods
+            @Override
+            public void bind(Movie movie) {
+                if (movies.indexOf(movie) == movies.size() - 1) fetchData();
+
+                String posterPath = MovieFetcher.getPosterUrl("w342", movie.getPosterPath());
+                Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+
+                movieTitleTextView.setText(movie.getOriginalTitle());
+
+                String shortOverview = movie.getOverview().substring(0, 50);
+                movieOverviewTextView.setText(shortOverview.substring(0, shortOverview.lastIndexOf(" ")));
+
+                moviewRatingBar.setRating((float) movie.getVoteAverage() / 2);
+            }
+        }
+
+        class SmallMovieHolder extends BindableMovieHolder implements Binder<Movie> {
+
+            // Private Members
+
+            private final String LOG_TAG = SmallMovieHolder.class.getSimpleName();
+            private ImageView movieThumbnailImageView;
+
+            // Constants
+
+            SmallMovieHolder(View itemView) {
+                super(itemView);
+                movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_small_image_view);
+            }
+
+            // Overridden Methods
+            @Override
+            public void bind(Movie movie) {
+                if (movies.indexOf(movie) == movies.size() - 1) fetchData();
+
+                String posterPath = MovieFetcher.getPosterUrl("w500", movie.getPosterPath());
+                Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+            }
+        }
+
     }
 
-    private class MovieHolder extends RecyclerView.ViewHolder {
+    /**
+     * An interface which knows how to bind objects of type @param <T>
+     */
+    interface Binder<T> {
 
-        // Private Members
-
-        private final String LOG_TAG = MovieHolder.class.getSimpleName();
-        private TextView movieOverviewTextView;
-        private ImageView movieThumbnailImageView;
-        private TextView movieTitleTextView;
-        private RatingBar moviewRatingBar;
-
-        // Constants
-
-        MovieHolder(View itemView) {
-            super(itemView);
-            movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_thumbnail_image_view);
-            movieTitleTextView = (TextView) itemView.findViewById(R.id.item_movie_title_text_view);
-            movieOverviewTextView = (TextView) itemView.findViewById(R.id.item_movie_overview_text_view);
-            moviewRatingBar = (RatingBar) itemView.findViewById(R.id.item_movie_rating_bar_view);
-        }
-
-        // Private Methods
-
-        private void bindMovie(Movie movie) {
-            if (movies.indexOf(movie) == movies.size() - 1) fetchData();
-
-            String posterPath = MovieFetcher.THUMBNAIL_BASE_URI + "/" + movie.getPosterPath();
-            Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
-
-            movieTitleTextView.setText(movie.getOriginalTitle());
-
-            String shortOverview = movie.getOverview().substring(0, 50);
-            movieOverviewTextView.setText(shortOverview.substring(0, shortOverview.lastIndexOf(" ")));
-
-            moviewRatingBar.setRating((float) movie.getVoteAverage() / 2);
-        }
-
+        // Public Methods
+        void bind(T object);
     }
 
 }
