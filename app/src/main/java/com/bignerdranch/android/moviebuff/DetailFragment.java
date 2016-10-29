@@ -2,6 +2,7 @@ package com.bignerdranch.android.moviebuff;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +73,8 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_release_date_text_view);
         moviePopularityTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_popularity_text_view);
         movieRatingBar = (RatingBar) view.findViewById(R.id.fragment_detail_movie_rating_bar);
+
+        movieOverviewTextView.setMovementMethod(new ScrollingMovementMethod());
         uiUpdated = true;
     }
 
