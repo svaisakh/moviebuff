@@ -27,7 +27,13 @@ public class GalleryFragment extends Fragment {
     private MovieFetcher fetcher;
     private RecyclerView movieRecyclerView;
     private List<Movie> movies;
-    private int page = 1;
+    private int page = 0;
+    /**
+     * The path to append to the query (excluding API key)
+     */
+    private String path = "popular";
+    // Constants
+    private static final String LOG_TAG = GalleryFragment.class.getSimpleName();
 
     // Constructor(s)
 
@@ -46,7 +52,7 @@ public class GalleryFragment extends Fragment {
         updateUi(view);
 
         String path = "popular";
-        fetchData(path, page, true);
+        fetchData();
 
         return view;
     }
@@ -55,21 +61,18 @@ public class GalleryFragment extends Fragment {
 
     /**
      * Queries the API for movies
-     *
-     * @param path the path to append to the query (excluding API key)
      */
-    private void fetchData(String path, int page, final boolean append) {
+    private void fetchData() {
         if (fetcher == null) fetcher = new MovieFetcher(new MovieFetcher.MovieFetcherListener() {
 
             // Overridden Methods
             @Override
             public void onMovieLoad(List<Movie> movies) {
-                if (! append) GalleryFragment.this.movies.clear();
                 GalleryFragment.this.movies.addAll(movies);
                 movieRecyclerView.getAdapter().notifyDataSetChanged();
             }
         });
-        fetcher.fetch(path, page);
+        fetcher.fetch(path, ++ page);
     }
 
     private void updateUi(View view) {
@@ -81,20 +84,6 @@ public class GalleryFragment extends Fragment {
             }
 
             movieRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-
-            movieRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-                // Overridden Methods
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    if (dy <= 0) return;
-                    if (! recyclerView.canScrollVertically(RecyclerView.VERTICAL)) {
-                        String path = "popular";
-                        fetchData(path, ++ page, true);
-                    }
-                }
-
-            });
         }
     }
 
@@ -167,16 +156,17 @@ public class GalleryFragment extends Fragment {
         // Private Methods
 
         private void bindMovie(Movie movie) {
+            if (movies.indexOf(movie) == movies.size() - 1) fetchData();
+
             String posterPath = MovieFetcher.THUMBNAIL_BASE_URI + "/" + movie.getPosterPath();
             Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
 
             movieTitleTextView.setText(movie.getOriginalTitle());
 
             String shortOverview = movie.getOverview().substring(0, 50);
-            movieOverviewTextView.setText(shortOverview);
+            movieOverviewTextView.setText(shortOverview.substring(0, shortOverview.lastIndexOf(" ")));
 
             moviewRatingBar.setRating((float) movie.getVoteAverage() / 2);
-
         }
 
     }
