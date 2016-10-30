@@ -60,7 +60,7 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
 
         movieReleaseDateTextView.setText(movie.getReleaseDate());
 
-        moviePopularityTextView.setText(String.valueOf(movie.getPopularity()));
+        moviePopularityTextView.setText(String.valueOf((int) movie.getPopularity()));
 
         movieRatingBar.setRating((float) (movie.getVoteAverage() / 2));
     }
