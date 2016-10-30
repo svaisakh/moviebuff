@@ -2,6 +2,7 @@ package com.bignerdranch.android.moviebuff.Network;
 
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bignerdranch.android.moviebuff.Model.Movie;
@@ -21,9 +22,8 @@ import java.util.List;
 public class MovieFetcher {
 
     // Private Members
-
     private MovieFetcherListener fetcherListener;
-
+    private int requestCode;
     // Constants
     /**
      * My v3 API Key for themoviedb.org
@@ -33,6 +33,7 @@ public class MovieFetcher {
      * The base uri for the data. Note the /3/ added for v3 API Key
      */
     private static final String BASE_URI = "https://api.themoviedb.org/3/movie";
+    private static final String LOG_TAG = MovieFetcher.class.getSimpleName();
     private static final String THUMBNAIL_BASE_URI = "http://image.tmdb.org/t/p";
 
     // Constructor(s)
@@ -40,18 +41,46 @@ public class MovieFetcher {
     /**
      * Assigns the list of movies to be fetched into
      */
-    public MovieFetcher(MovieFetcherListener fetcherListener) {
+    public MovieFetcher(MovieFetcherListener fetcherListener, int requestCode) {
         this.fetcherListener = fetcherListener;
+        this.requestCode = requestCode;
     }
 
+
     // Private Methods
+
+    /**
+     * Parses given JSON string and returns JSONArray of deflated Movies
+     *
+     * @param jsonString String containing results of query in JSON format
+     * @return JSONArray containing movie data obtained from the given string
+     */
+    private static JSONObject parseMovie(String jsonString) throws JSONException {
+        if (TextUtils.isEmpty(jsonString)) return null;
+
+        return new JSONObject(jsonString);
+    }
+
+    // Public Methods
+    public void execute(String... params) {
+        new MovieFetcherTask().execute(params);
+    }
+
+    public static String getPosterUrl(String size, String moviePosterPath) {
+        if (TextUtils.isEmpty(size) || TextUtils.isEmpty(moviePosterPath)) return null;
+
+        return new StringBuilder(THUMBNAIL_BASE_URI).append("/").append(size).append("/").append(moviePosterPath).toString();
+    }
 
     /**
      * Inflates all Movies from this JSONArray
      *
      * @param jsonArray Array of JSONObjects representing a Movie
      */
-    private static List<Movie> inflate(JSONArray jsonArray) throws JSONException {
+    public static List<Movie> inflate(JSONArray jsonArray) throws JSONException {
+        if (jsonArray == null) return null;
+        else if (jsonArray.length() == 0) return null;
+
         List<Movie> movieList = new ArrayList<>();
         JSONObject movieJSONObject;
         Movie movie;
@@ -69,7 +98,9 @@ public class MovieFetcher {
      * @param jsonString String containing results of query in JSON format
      * @return JSONArray containing movie data obtained from the given string
      */
-    private static JSONArray parse(String jsonString) throws JSONException {
+    public static JSONArray parseMovieList(String jsonString) throws JSONException {
+        if (TextUtils.isEmpty(jsonString)) return null;
+
         final String OWM_RESULTS = "results";
 
         JSONObject nodeJSONObject = new JSONObject(jsonString);
@@ -77,31 +108,8 @@ public class MovieFetcher {
         return nodeJSONObject.getJSONArray(OWM_RESULTS);
     }
 
-    // Public Methods
-
-    /**
-     * Fetches a list of movies from themoviedb.org customized according to the appended URL
-     *
-     * @param appendString the URL that gets appended to the base URL (excluding API key
-     * @param page         the page that needs to be queried from
-     */
-    public void fetch(String appendString, int page) {
-        new FetchMovieTask().execute(appendString, String.valueOf(page));
-    }
-
-    public static String getPosterUrl(String size, String moviePosterPath) {
-        return new StringBuilder(THUMBNAIL_BASE_URI).append("/").append(size).append("/").append(moviePosterPath).toString();
-    }
-
     // Inner Classes
-
-    /**
-     * Fetches the JSON string for the first parameter path (eg. execute("popular") gives popular movies).
-     */
-    private class FetchMovieTask extends AsyncTask<String, Void, String> {
-
-        // Private Members
-        private final String LOG_TAG = FetchMovieTask.class.getSimpleName();
+    private class MovieFetcherTask extends AsyncTask<String, Void, String> {
 
         // Overridden Methods
 
@@ -112,14 +120,7 @@ public class MovieFetcher {
          */
         @Override
         protected void onPostExecute(String movieData) {
-            List<Movie> movies = null;
-            try {
-                movies = inflate(parse(movieData));
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, "Trouble brewing!", e);
-                e.printStackTrace();
-            }
-            fetcherListener.onMovieLoad(movies);
+            fetcherListener.onComplete(movieData, requestCode);
         }
 
         /**
@@ -127,7 +128,7 @@ public class MovieFetcher {
          *
          * @param params The rest of the path of the query.
          *               Index 0 should be the movie path that is needed (eg. popular/top_rated etc.)
-         *               Index 1 is the page number
+         *               Other indices should be key-value pairs
          * @return Returns the string obtained from the query
          */
         @Override
@@ -135,12 +136,16 @@ public class MovieFetcher {
 
             if (params.length == 0) return null;
 
-            Uri movieUri = Uri.parse(BASE_URI)
-                              .buildUpon()
-                              .appendPath(params[0])
-                              .appendQueryParameter("page", params[1])
-                              .appendQueryParameter("api_key", API_KEY)
-                              .build();
+            Uri.Builder movieUriBuilder = Uri.parse(BASE_URI)
+                                             .buildUpon()
+                                             .appendPath(params[0])
+                                             .appendQueryParameter("api_key", API_KEY);
+
+            for (int i = 1; i < params.length - 1; i += 2) {
+                movieUriBuilder.appendQueryParameter(params[i], params[i + 1]);
+            }
+
+            Uri movieUri = movieUriBuilder.build();
 
             String movieData = null;
             HttpHelper helper = null;
@@ -171,7 +176,7 @@ public class MovieFetcher {
         /**
          * Callback triggered after movie list is loaded
          */
-        void onMovieLoad(List<Movie> movies);
+        void onComplete(String movieData, int requestCode);
 
     }
 

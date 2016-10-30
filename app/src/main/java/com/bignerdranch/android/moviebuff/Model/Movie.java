@@ -13,6 +13,7 @@ import java.io.Serializable;
 public class Movie implements Serializable {
 
     // Private Members
+    private String backdropPath;
     private long id;
     private String jsonBluePrint;
     private String originalTitle;
@@ -23,15 +24,22 @@ public class Movie implements Serializable {
     private double voteAverage;
 
     // Constructor(s)
-
     public Movie(JSONObject jsonMovie) throws JSONException {
         jsonBluePrint = jsonMovie.toString();
         inflate(jsonMovie);
     }
 
     // Getter Methods
+    private String getBackdropPath() {
+        return backdropPath;
+    }
+
     public long getId() {
         return id;
+    }
+
+    private String getJsonBluePrint() {
+        return jsonBluePrint;
     }
 
     public String getOriginalTitle() {
@@ -59,6 +67,10 @@ public class Movie implements Serializable {
     }
 
     // Setter Methods
+    private void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
+    }
+
     private void setId(long id) {
         this.id = id;
     }
@@ -102,6 +114,7 @@ public class Movie implements Serializable {
         final String OWM_POSTER_PATH = "poster_path";
         final String OWM_RELEASE_DATE = "release_date";
         final String OWM_VOTE_AVERAGE = "vote_average";
+        final String OWM_BACKDROP_PATH = "backdrop_path";
 
         long id = movieJSONObject.getLong(OWM_ID);
         String originalTitle = movieJSONObject.getString(OWM_ORIGINAL_TITLE);
@@ -110,6 +123,7 @@ public class Movie implements Serializable {
         String posterPath = movieJSONObject.getString(OWM_POSTER_PATH);
         String releaseDate = movieJSONObject.getString(OWM_RELEASE_DATE);
         double voteAverage = movieJSONObject.getDouble(OWM_VOTE_AVERAGE);
+        String backdropPath = movieJSONObject.getString(OWM_BACKDROP_PATH);
 
         setId(id);
         setOriginalTitle(originalTitle);
@@ -118,6 +132,7 @@ public class Movie implements Serializable {
         setPosterPath(posterPath);
         setReleaseDate(releaseDate);
         setVoteAverage(voteAverage);
+        setBackdropPath(backdropPath);
     }
 
 }

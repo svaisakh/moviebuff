@@ -16,6 +16,8 @@ import com.bignerdranch.android.moviebuff.Model.Movie;
 import com.bignerdranch.android.moviebuff.Network.MovieFetcher;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +37,7 @@ public class GalleryFragment extends Fragment {
     private String path = "popular";
     // Constants
     private static final String LOG_TAG = GalleryFragment.class.getSimpleName();
+    private static final int REQUEST_FETCH_MOVIE_LIST = 0;
 
     // Constructor(s)
 
@@ -68,12 +71,17 @@ public class GalleryFragment extends Fragment {
 
             // Overridden Methods
             @Override
-            public void onMovieLoad(List<Movie> movies) {
-                GalleryFragment.this.movies.addAll(movies);
+            public void onComplete(String movieData, int requestCode) {
+                try {
+                    movies.addAll(MovieFetcher.inflate(MovieFetcher.parseMovieList(movieData)));
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, "Couldn't parse json data. Something wrong.", e);
+                    e.printStackTrace();
+                }
                 movieRecyclerView.getAdapter().notifyDataSetChanged();
             }
-        });
-        fetcher.fetch(path, ++ page);
+        }, REQUEST_FETCH_MOVIE_LIST);
+        fetcher.execute(path, "page", String.valueOf(++ page));
     }
 
     private void updateUi(View view) {
