@@ -30,7 +30,7 @@ public class Movie implements Serializable {
     }
 
     // Getter Methods
-    private String getBackdropPath() {
+    public String getBackdropPath() {
         return backdropPath;
     }
 

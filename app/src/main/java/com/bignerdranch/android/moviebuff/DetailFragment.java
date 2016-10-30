@@ -1,7 +1,10 @@
 package com.bignerdranch.android.moviebuff;
 
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,12 +23,15 @@ import com.squareup.picasso.Picasso;
 public class DetailFragment extends Fragment implements Bindable<Movie> {
 
     // Private Members
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+    private ImageView movieBackdropImageView;
     private TextView movieOverviewTextView;
     private TextView moviePopularityTextView;
     private ImageView moviePosterImageView;
     private RatingBar movieRatingBar;
     private TextView movieReleaseDateTextView;
     private TextView movieTitleTextView;
+    private Toolbar toolbar;
     private boolean uiUpdated = false;
     // Constants
     private static final String ARG_MOVIE = DetailFragment.class.getName() + ".argMovie";
@@ -63,6 +69,12 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
         moviePopularityTextView.setText(String.valueOf((int) movie.getPopularity()));
 
         movieRatingBar.setRating((float) (movie.getVoteAverage() / 2));
+
+        collapsingToolbarLayout.setTitle(movie.getOriginalTitle());
+
+        String backdropPath = MovieFetcher.getPosterUrl("w500", movie.getBackdropPath());
+        Picasso.with(getActivity()).load(backdropPath).into(movieBackdropImageView);
+
     }
 
     // Private Methods
@@ -73,8 +85,15 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_release_date_text_view);
         moviePopularityTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_popularity_text_view);
         movieRatingBar = (RatingBar) view.findViewById(R.id.fragment_detail_movie_rating_bar);
+        toolbar = (Toolbar) view.findViewById(R.id.fragment_detail_toolbar);
+        collapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.fragment_detail_collapsing_toolbar_layout);
+        movieBackdropImageView = (ImageView) view.findViewById(R.id.fragment_detail_collapsing_toolbar_backdrop_image_view);
 
         movieOverviewTextView.setMovementMethod(new ScrollingMovementMethod());
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar(toolbar);
+
         uiUpdated = true;
     }
 
