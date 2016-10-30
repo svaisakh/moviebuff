@@ -51,7 +51,7 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
     public void bind(Movie movie) {
         if (movie == null || ! uiUpdated) return;
 
-        String posterPath = MovieFetcher.getPosterUrl("w342", movie.getPosterPath());
+        String posterPath = MovieFetcher.getPosterUrl("w500", movie.getPosterPath());
         Picasso.with(getActivity()).load(posterPath).into(moviePosterImageView);
 
         movieTitleTextView.setText(movie.getOriginalTitle());

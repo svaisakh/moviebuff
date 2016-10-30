@@ -32,16 +32,47 @@
                 android:textAppearance="@android:style/TextAppearance.Holo.Large"
                 tools:text="Interstellar" />
 
-            <TextView
-                android:id="@+id/fragment_detail_movie_overview_text_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_marginTop="16dp"
-                android:layout_weight="1"
+                android:layout_height="match_parent"
                 android:gravity="center_horizontal"
-                android:scrollbars="vertical"
-                android:textAppearance="@android:style/TextAppearance.Holo.Medium"
-                tools:text="Interstellar chronicles the adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage." />
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_horizontal_margin">
+
+                <TextView
+                    android:id="@+id/fragment_detail_movie_release_date_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Small"
+                    tools:text="2011-11-06" />
+
+                <TextView
+                    android:id="@+id/fragment_detail_movie_popularity_text_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Small"
+                    tools:text="21" />
+
+                <RatingBar
+                    android:id="@+id/fragment_detail_movie_rating_bar"
+                    style="@android:style/Widget.Holo.Light.RatingBar.Indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:numStars="5"
+                    android:rating="4.1" />
+
+            </RelativeLayout>
+
+
         </LinearLayout>
 
 
@@ -54,40 +85,16 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@color/colorAccent" />
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/fragment_detail_movie_overview_text_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/fragment_detail_movie_release_date_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:textAppearance="@android:style/TextAppearance.Holo.Small"
-            tools:text="2011-11-06" />
-
-        <TextView
-            android:id="@+id/fragment_detail_movie_popularity_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="left|center_vertical"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:textAppearance="@android:style/TextAppearance.Holo.Small"
-            tools:text="21" />
-
-        <RatingBar
-            android:id="@+id/fragment_detail_movie_rating_bar"
-            style="@android:style/Widget.Holo.Light.RatingBar.Indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:numStars="5"
-            android:rating="4.1" />
-
-    </LinearLayout>
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:scrollbars="vertical"
+        android:textAppearance="@android:style/TextAppearance.Holo.Medium"
+        tools:text="Interstellar chronicles the adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage." />
 
 
 </LinearLayout>
