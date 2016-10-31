@@ -46,7 +46,6 @@ public class MovieFetcher {
         this.requestCode = requestCode;
     }
 
-
     // Private Methods
 
     /**
@@ -58,6 +57,7 @@ public class MovieFetcher {
         if (movieJSONObject == null) return null;
 
         Movie movie = new Movie(movieJSONObject);
+
         final String OWM_ID = "id";
         final String OWM_ORIGINAL_TITLE = "original_title";
         final String OWM_OVERVIEW = "overview";
@@ -88,18 +88,6 @@ public class MovieFetcher {
         return movie;
     }
 
-    /**
-     * Parses given JSON string and returns JSONArray of deflated Movies
-     *
-     * @param jsonString String containing results of query in JSON format
-     * @return JSONArray containing movie data obtained from the given string
-     */
-    private static JSONObject parseMovie(String jsonString) throws JSONException {
-        if (TextUtils.isEmpty(jsonString)) return null;
-
-        return new JSONObject(jsonString);
-    }
-
     // Public Methods
     public void execute(String... params) {
         new MovieFetcherTask().execute(params);
@@ -109,6 +97,31 @@ public class MovieFetcher {
         if (TextUtils.isEmpty(size) || TextUtils.isEmpty(moviePosterPath)) return null;
 
         return new StringBuilder(THUMBNAIL_BASE_URI).append("/").append(size).append("/").append(moviePosterPath).toString();
+    }
+
+    public static List<String> getReviews(String jsonString) throws JSONException {
+        if (TextUtils.isEmpty(jsonString)) return null;
+
+        final String OWM_RESULTS = "results";
+        final String OWM_CONTENT = "content";
+
+        List<String> results = new ArrayList<>();
+        JSONObject nodeJSONObject = new JSONObject(jsonString);
+        JSONArray resultsJSONArray = nodeJSONObject.getJSONArray(OWM_RESULTS);
+
+        for (int i = 0; i < resultsJSONArray.length(); i++) {
+            JSONObject resultJSONObject = resultsJSONArray.getJSONObject(i);
+            results.add(resultJSONObject.getString(OWM_CONTENT));
+        }
+
+        return results;
+    }
+
+    public static String getTagline(String jsonString) throws JSONException {
+        if (TextUtils.isEmpty(jsonString)) return null;
+        final String OWM_TAGLINE = "tagline";
+        JSONObject movieJSONObject = new JSONObject(jsonString);
+        return movieJSONObject.getString(OWM_TAGLINE);
     }
 
     /**
@@ -175,16 +188,21 @@ public class MovieFetcher {
 
             if (params.length == 0) return null;
 
-            Uri.Builder movieUriBuilder = Uri.parse(BASE_URI)
-                                             .buildUpon()
-                                             .appendPath(params[0])
-                                             .appendQueryParameter("api_key", API_KEY);
+            Uri.Builder movieUriBuilder = Uri.parse(BASE_URI).buildUpon();
+
+            String[] pathList = params[0].split("/");
+            for (String eachPath : pathList) {
+                movieUriBuilder.appendPath(eachPath);
+            }
 
             for (int i = 1; i < params.length - 1; i += 2) {
                 movieUriBuilder.appendQueryParameter(params[i], params[i + 1]);
             }
 
+            movieUriBuilder.appendQueryParameter("api_key", API_KEY);
+
             Uri movieUri = movieUriBuilder.build();
+            Log.d(LOG_TAG, movieUri.toString());
 
             String movieData = null;
             HttpHelper helper = null;

@@ -5,7 +5,9 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,10 @@ import android.widget.TextView;
 import com.bignerdranch.android.moviebuff.Model.Movie;
 import com.bignerdranch.android.moviebuff.Network.MovieFetcher;
 import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+
+import java.util.List;
 
 /**
  * A fragment that shows the datails of a particular movie
@@ -30,11 +36,15 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
     private ImageView moviePosterImageView;
     private RatingBar movieRatingBar;
     private TextView movieReleaseDateTextView;
-    private TextView movieTitleTextView;
+    private TextView movieReviewTextView;
+    private TextView movieTaglineTextView;
     private Toolbar toolbar;
     private boolean uiUpdated = false;
     // Constants
     private static final String ARG_MOVIE = DetailFragment.class.getName() + ".argMovie";
+    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
+    private static final int REQUEST_FETCH_REVIEWS = 0;
+    private static final int REQUEST_FETCH_TAGLINE = 1;
 
     public DetailFragment() {
         // Required empty public constructor
@@ -54,15 +64,19 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
     }
 
     @Override
-    public void bind(Movie movie) {
+    public void bind(final Movie movie) {
         if (movie == null || ! uiUpdated) return;
 
         String posterPath = MovieFetcher.getPosterUrl("w500", movie.getPosterPath());
         Picasso.with(getActivity()).load(posterPath).into(moviePosterImageView);
 
-        movieTitleTextView.setText(movie.getOriginalTitle());
-
-        movieOverviewTextView.setText(movie.getOverview());
+        String overview = movie.getOverview();
+        if (TextUtils.isEmpty(overview)) {
+            movieOverviewTextView.setVisibility(View.GONE);
+            ((View) movieOverviewTextView.getParent()).setVisibility(View.GONE);
+        }
+        else
+            movieOverviewTextView.setText(movie.getOverview());
 
         movieReleaseDateTextView.setText(movie.getReleaseDate());
 
@@ -75,12 +89,46 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
         String backdropPath = MovieFetcher.getPosterUrl("w500", movie.getBackdropPath());
         Picasso.with(getActivity()).load(backdropPath).into(movieBackdropImageView);
 
+        new MovieFetcher(new MovieFetcher.MovieFetcherListener() {
+
+            // Overridden Methods
+            @Override
+            public void onComplete(String movieData, int requestCode) {
+                try {
+                    List<String> reviews = MovieFetcher.getReviews(movieData);
+                    if (reviews == null | reviews.size() != 0)
+                        movieReviewTextView.setText(reviews.get(0));
+                    else {
+                        movieReviewTextView.setVisibility(View.GONE);
+                        ((View) movieReviewTextView.getParent()).setVisibility(View.GONE);
+                    }
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, "Couldn't fetch reviews", e);
+                    e.printStackTrace();
+                }
+            }
+        }, REQUEST_FETCH_REVIEWS).execute(String.valueOf(movie.getId()) + "/reviews");
+
+        new MovieFetcher(new MovieFetcher.MovieFetcherListener() {
+
+            // Overridden Methods
+            @Override
+            public void onComplete(String movieData, int requestCode) {
+                try {
+                    movieTaglineTextView.setText(MovieFetcher.getTagline(movieData));
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, "Couldn't fetch tagline", e);
+                    e.printStackTrace();
+                }
+            }
+        }, REQUEST_FETCH_TAGLINE).execute(String.valueOf(movie.getId()));
+
     }
 
     // Private Methods
     private void updateUi(View view) {
         moviePosterImageView = (ImageView) view.findViewById(R.id.fragment_detail_movie_poster_image_view);
-        movieTitleTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_title_text_view);
+        movieTaglineTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_tagline_text_view);
         movieOverviewTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_overview_text_view);
         movieReleaseDateTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_release_date_text_view);
         moviePopularityTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_popularity_text_view);
@@ -88,6 +136,7 @@ public class DetailFragment extends Fragment implements Bindable<Movie> {
         toolbar = (Toolbar) view.findViewById(R.id.fragment_detail_toolbar);
         collapsingToolbarLayout = (CollapsingToolbarLayout) view.findViewById(R.id.fragment_detail_collapsing_toolbar_layout);
         movieBackdropImageView = (ImageView) view.findViewById(R.id.fragment_detail_collapsing_toolbar_backdrop_image_view);
+        movieReviewTextView = (TextView) view.findViewById(R.id.fragment_detail_movie_review_text_view);
 
         movieOverviewTextView.setMovementMethod(new ScrollingMovementMethod());
 

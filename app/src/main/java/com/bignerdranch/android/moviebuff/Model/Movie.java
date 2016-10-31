@@ -98,6 +98,4 @@ public class Movie implements Serializable {
         this.voteAverage = voteAverage;
     }
 
-    // Private Methods
-
 }
