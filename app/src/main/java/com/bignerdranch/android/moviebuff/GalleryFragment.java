@@ -2,8 +2,10 @@ package com.bignerdranch.android.moviebuff;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -92,7 +94,6 @@ public class GalleryFragment extends Fragment {
                 movieRecyclerView.setAdapter(new MovieAdapter(movies));
             }
 
-
             GridLayoutManager layoutManager = new GridLayoutManager(getActivity(), 2);
             layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
 
@@ -104,8 +105,10 @@ public class GalleryFragment extends Fragment {
                 }
             });
             movieRecyclerView.setLayoutManager(layoutManager);
-
         }
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.setSupportActionBar((Toolbar) view.findViewById(R.id.fragment_gallery_toolbar));
     }
 
     // Package Private Methods

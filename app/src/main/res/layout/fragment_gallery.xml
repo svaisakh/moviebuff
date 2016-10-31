@@ -1,6 +1,22 @@
-<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
-                                        xmlns:tools="http://schemas.android.com/tools"
-                                        android:id="@+id/fragment_gallery_recycler_view"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        tools:context="com.bignerdranch.android.moviebuff.GalleryFragment" />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/fragment_gallery_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@color/colorPrimary"
+        app:titleTextColor="@color/colorBackground" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/fragment_gallery_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.bignerdranch.android.moviebuff.GalleryFragment" />
+
+</LinearLayout>
