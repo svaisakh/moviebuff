@@ -1,5 +1,6 @@
 package com.bignerdranch.android.moviebuff;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import com.bignerdranch.android.moviebuff.Model.Movie;
 import com.bignerdranch.android.moviebuff.Network.MovieFetcher;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
@@ -127,7 +129,11 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onComplete(String movieData, int requestCode) {
                 try {
-                    movies.addAll(MovieFetcher.inflate(MovieFetcher.parseMovieList(movieData)));
+                    JSONArray moviesJSONArray = MovieFetcher.parseMovieList(movieData);
+                    if (moviesJSONArray == null) return;
+                    List<Movie> movieList = MovieFetcher.inflate(moviesJSONArray);
+                    if (movieList == null | movieList.size() == 0) return;
+                    movies.addAll(movieList);
                 } catch (JSONException e) {
                     Log.e(LOG_TAG, "Couldn't parse json data. Something wrong.", e);
                     e.printStackTrace();
@@ -259,6 +265,7 @@ public class GalleryFragment extends Fragment {
             LargeMovieHolder(View itemView) {
                 super(itemView);
                 itemView.setOnClickListener(this);
+                itemView.setVisibility(View.GONE);
                 movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_large_image_view);
                 movieTitleTextView = (TextView) itemView.findViewById(R.id.item_movie_large_title_text_view);
                 movieOverviewTextView = (TextView) itemView.findViewById(R.id.item_movie_large_overview_text_view);
@@ -278,8 +285,15 @@ public class GalleryFragment extends Fragment {
                 if (movies.indexOf(movie) == movies.size() - 1) fetchData();
 
                 String posterPath = MovieFetcher.getPosterUrl("w342", movie.getPosterPath());
-                Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+                new Picasso.Builder(getActivity()).listener(new Picasso.Listener() {
 
+                    // Overridden Methods
+                    @Override
+                    public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                        itemView.setVisibility(View.GONE);
+                    }
+                }).build().with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+                itemView.setVisibility(View.VISIBLE);
                 movieTitleTextView.setText(movie.getOriginalTitle());
 
                 String shortOverview = movie.getOverview().substring(0, 50);
@@ -299,6 +313,7 @@ public class GalleryFragment extends Fragment {
             // Constants
             SmallMovieHolder(View itemView) {
                 super(itemView);
+                itemView.setVisibility(View.GONE);
                 itemView.setOnClickListener(this);
                 movieThumbnailImageView = (ImageView) itemView.findViewById(R.id.item_movie_small_image_view);
             }
@@ -315,7 +330,15 @@ public class GalleryFragment extends Fragment {
                 if (movies.indexOf(movie) == movies.size() - 1) fetchData();
 
                 String posterPath = MovieFetcher.getPosterUrl("w500", movie.getPosterPath());
-                Picasso.with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+                new Picasso.Builder(getActivity()).listener(new Picasso.Listener() {
+
+                    // Overridden Methods
+                    @Override
+                    public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
+                        itemView.setVisibility(View.GONE);
+                    }
+                }).build().with(getActivity()).load(posterPath).into(movieThumbnailImageView);
+                itemView.setVisibility(View.VISIBLE);
             }
         }
 
