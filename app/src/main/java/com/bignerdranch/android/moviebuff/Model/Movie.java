@@ -26,7 +26,6 @@ public class Movie implements Serializable {
     // Constructor(s)
     public Movie(JSONObject jsonMovie) throws JSONException {
         jsonBluePrint = jsonMovie.toString();
-        inflate(jsonMovie);
     }
 
     // Getter Methods
@@ -67,72 +66,38 @@ public class Movie implements Serializable {
     }
 
     // Setter Methods
-    private void setBackdropPath(String backdropPath) {
+    public void setBackdropPath(String backdropPath) {
         this.backdropPath = backdropPath;
     }
 
-    private void setId(long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    private void setOriginalTitle(String originalTitle) {
+    public void setOriginalTitle(String originalTitle) {
         this.originalTitle = originalTitle;
     }
 
-    private void setOverview(String overview) {
+    public void setOverview(String overview) {
         this.overview = overview;
     }
 
-    private void setPopularity(double popularity) {
+    public void setPopularity(double popularity) {
         this.popularity = popularity;
     }
 
-    private void setPosterPath(String posterPath) {
+    public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
 
-    private void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
     }
 
-    private void setVoteAverage(double voteAverage) {
+    public void setVoteAverage(double voteAverage) {
         this.voteAverage = voteAverage;
     }
 
     // Private Methods
-
-    /**
-     * Inflates JSONObject to a new movie object
-     *
-     * @param movieJSONObject the JSONObject from which to inflate
-     */
-    private void inflate(JSONObject movieJSONObject) throws JSONException {
-        final String OWM_ID = "id";
-        final String OWM_ORIGINAL_TITLE = "original_title";
-        final String OWM_OVERVIEW = "overview";
-        final String OWM_POPULARITY = "popularity";
-        final String OWM_POSTER_PATH = "poster_path";
-        final String OWM_RELEASE_DATE = "release_date";
-        final String OWM_VOTE_AVERAGE = "vote_average";
-        final String OWM_BACKDROP_PATH = "backdrop_path";
-
-        long id = movieJSONObject.getLong(OWM_ID);
-        String originalTitle = movieJSONObject.getString(OWM_ORIGINAL_TITLE);
-        String overview = movieJSONObject.getString(OWM_OVERVIEW);
-        double popularity = movieJSONObject.getDouble(OWM_POPULARITY);
-        String posterPath = movieJSONObject.getString(OWM_POSTER_PATH);
-        String releaseDate = movieJSONObject.getString(OWM_RELEASE_DATE);
-        double voteAverage = movieJSONObject.getDouble(OWM_VOTE_AVERAGE);
-        String backdropPath = movieJSONObject.getString(OWM_BACKDROP_PATH);
-
-        setId(id);
-        setOriginalTitle(originalTitle);
-        setOverview(overview);
-        setPopularity(popularity);
-        setPosterPath(posterPath);
-        setReleaseDate(releaseDate);
-        setVoteAverage(voteAverage);
-        setBackdropPath(backdropPath);
-    }
 
 }

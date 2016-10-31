@@ -50,6 +50,45 @@ public class MovieFetcher {
     // Private Methods
 
     /**
+     * Inflates JSONObject to a new movie object
+     *
+     * @param movieJSONObject the JSONObject from which to inflate
+     */
+    private static Movie inflate(JSONObject movieJSONObject) throws JSONException {
+        if (movieJSONObject == null) return null;
+
+        Movie movie = new Movie(movieJSONObject);
+        final String OWM_ID = "id";
+        final String OWM_ORIGINAL_TITLE = "original_title";
+        final String OWM_OVERVIEW = "overview";
+        final String OWM_POPULARITY = "popularity";
+        final String OWM_POSTER_PATH = "poster_path";
+        final String OWM_RELEASE_DATE = "release_date";
+        final String OWM_VOTE_AVERAGE = "vote_average";
+        final String OWM_BACKDROP_PATH = "backdrop_path";
+
+        long id = movieJSONObject.getLong(OWM_ID);
+        String originalTitle = movieJSONObject.getString(OWM_ORIGINAL_TITLE);
+        String overview = movieJSONObject.getString(OWM_OVERVIEW);
+        double popularity = movieJSONObject.getDouble(OWM_POPULARITY);
+        String posterPath = movieJSONObject.getString(OWM_POSTER_PATH);
+        String releaseDate = movieJSONObject.getString(OWM_RELEASE_DATE);
+        double voteAverage = movieJSONObject.getDouble(OWM_VOTE_AVERAGE);
+        String backdropPath = movieJSONObject.getString(OWM_BACKDROP_PATH);
+
+        movie.setId(id);
+        movie.setOriginalTitle(originalTitle);
+        movie.setOverview(overview);
+        movie.setPopularity(popularity);
+        movie.setPosterPath(posterPath);
+        movie.setReleaseDate(releaseDate);
+        movie.setVoteAverage(voteAverage);
+        movie.setBackdropPath(backdropPath);
+
+        return movie;
+    }
+
+    /**
      * Parses given JSON string and returns JSONArray of deflated Movies
      *
      * @param jsonString String containing results of query in JSON format
@@ -86,7 +125,7 @@ public class MovieFetcher {
         Movie movie;
         for (int i = 0; i < jsonArray.length(); i++) {
             movieJSONObject = jsonArray.getJSONObject(i);
-            movie = new Movie(movieJSONObject);
+            movie = inflate(movieJSONObject);
             movieList.add(movie);
         }
         return movieList;
