@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="movie_type_preference_entries">
+        <item>@string/movies_type_popular</item>
+        <item>@string/movies_type_top_rated</item>
+    </string-array>
+</resources>

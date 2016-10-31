@@ -1,6 +1,7 @@
 package com.bignerdranch.android.moviebuff;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -8,8 +9,12 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -37,8 +42,11 @@ public class GalleryFragment extends Fragment {
      * The path to append to the query (excluding API key)
      */
     private String path = "popular";
+    private ImageButton settingsImageButton;
     // Constants
     private static final String LOG_TAG = GalleryFragment.class.getSimpleName();
+    private static final String PATH_POPULAR = "popular";
+    private static final String PATH_TOP_RATED = "top_rated";
     private static final int REQUEST_FETCH_MOVIE_LIST = 0;
 
     // Constructor(s)
@@ -49,21 +57,65 @@ public class GalleryFragment extends Fragment {
 
     // Overridden Methods
     @Override
+    public void onResume() {
+        super.onResume();
+        checkMovieType();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_fragment_gallery, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_fragment_gallery_settings:
+                startActivity(SettingsActivity.starterIntent(getActivity()));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_gallery, container, false);
+
+        setHasOptionsMenu(true);
 
         movies = new ArrayList<>();
 
         updateUi(view);
 
-        String path = "popular";
+        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(getString(R.string.movies_type_preference_key), getString(R.string.movies_type_popular)).equals(getString(R.string.movies_type_top_rated)))
+            path = PATH_TOP_RATED;
         fetchData();
 
         return view;
     }
 
     // Private Methods
+    private void checkMovieType() {
+        String movieType = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(getString(R.string.movies_type_preference_key), getString(R.string.movies_type_popular));
+        if (movieType.equals(getString(R.string.movies_type_popular))) {
+            if (! path.equals(PATH_POPULAR)) {
+                path = PATH_POPULAR;
+                page = 0;
+                movies.clear();
+                fetchData();
+            }
+        }
+        if (movieType.equals(getString(R.string.movies_type_top_rated))) {
+            if (! path.equals(PATH_TOP_RATED)) {
+                path = PATH_TOP_RATED;
+                page = 0;
+                movies.clear();
+                fetchData();
+            }
+        }
+    }
 
     /**
      * Queries the API for movies

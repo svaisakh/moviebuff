@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="@string/movies_type_popular"
+        android:dialogTitle="@string/movies_type_preference_dialogTitle"
+        android:entries="@array/movie_type_preference_entries"
+        android:entryValues="@array/movie_type_preference_entries"
+        android:key="@string/movies_type_preference_key"
+        android:negativeButtonText="@android:string/cancel"
+        android:positiveButtonText="@android:string/ok"
+        android:title="@string/movies_type_preference_title" />
+</PreferenceScreen>

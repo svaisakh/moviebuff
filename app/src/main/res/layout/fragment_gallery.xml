@@ -11,7 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="@color/colorPrimary"
-        app:titleTextColor="@color/colorBackground" />
+        app:title="@string/app_name"
+        app:titleTextColor="@color/colorBackground">
+
+    </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_gallery_recycler_view"
